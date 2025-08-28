@@ -1,5 +1,5 @@
 ###
-### This script checks for table names for PascalCase 
+### This script checks for to table name to consist of at least two words
 ###
 ### Author: Adeel Malik
 
@@ -7,7 +7,6 @@
 ### Helpers come from Liquibase
 ###
 from liquibase_checks_python import liquibase_utilities as lb
-import os
 import re
 import sys
 import wordninja
@@ -48,43 +47,30 @@ def find_dictionary_words(input_data):
     return dictionary_words
 
 
-def is_pascal_case(input_data):
+def is_two_words(input_data):
     """
-    Checks if a string is in Pascal Case.
-
-    A string is considered Pascal Case if it:
-    - First charater is upper case, all other characters lower case.
-    - Does not start with a number.
+    Checks if a string consists of two dictionary words.
 
     Args:
         input_data: A list of strings to check.
 
     Returns:
-        True if the string is in Pascal Case, False otherwise.
+        True if the string consists of two words, False otherwise.
     """
 
-    pascal_case_found = True
+    two_words_found = False
 
-    for word in input_data:
+    if len(input_data) >= 2:
+        two_words_found = True
+    else:
+        two_words_found = False
 
-        # print (script_name + "word :" + word)
+    return two_words_found
 
-        if re.match(r"^[A-Z][a-z]*$", word):
-            pascal_case_found = pascal_case_found and True
-            # return True
-        else:
-            pascal_case_found = pascal_case_found and False
 
-        if word[0].isdigit():
-            # return False
-            pascal_case_found = pascal_case_found and False
-
-        # print (script_name + "word :" + word + ", " + str(pascal_case_found))    
-
-    return pascal_case_found
-
-# script_name = "table_name_is_PascalCase.py" + ": "
+# script_name = "table_name_is_two_words.py" + ": "
 script_name = lb.get_script_path() + ": "
+
 
 ###
 ### Retrieve log handler
@@ -114,7 +100,7 @@ for change in changes:
     ### Split SQL into a list of strings to remove whitespace
     ###
     # sql_list = liquibase_utilities.generate_sql(change).split()
-    # print (script_name + script_name + "sql_list:" + str(sql_list))
+    # print (script_name + "sql_list:" + str(sql_list))
 
     table_names_list = []
 
@@ -128,16 +114,18 @@ for change in changes:
     for table_name in table_names_list:
         
         dictionary_words = []
+        isTwoWords = False
 
         dictionary_words = find_dictionary_words(table_name)
-        # print(script_name + "Dictionary words: " + str(dictionary_words))
+        # print("Dictionary words: " + str(dictionary_words))
 
-        isPascalCase = is_pascal_case(dictionary_words)
-        print (script_name + "Table name: " + table_name + ", " + str(isPascalCase))
+        isTwoWords = is_two_words(dictionary_words)
+        # isPascalCase = is_pascal_case(dictionary_words)
+        print (script_name + "Table name: " + table_name + ", " + str(isTwoWords))
 
-        if not isPascalCase:
+        if not isTwoWords:
             liquibase_status.fired = True
-            status_message = "Table name \"" + f"{table_name}" + "\" is NOT PascalCase."
+            status_message = "Table name \"" + f"{table_name}" + "\" is NOT two words. Each table name must be at least two words."
             liquibase_status.message = status_message
             sys.exit(1)
 
